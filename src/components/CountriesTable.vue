@@ -1,7 +1,6 @@
 <template>
   <div>
-    <input v-debounce:500="filterTable" type="text" v-model="searchFilter" />
-    <!-- <button @click="filterTable">Search</button> -->
+    <SearchTable />
     <table>
       <tr>
         <th>
@@ -11,7 +10,7 @@
         <th>Capital</th>
         <th>Population</th>
       </tr>
-      <tr v-for="country in countries" :key="country.name">
+      <tr v-for="country in allCountries" :key="country.name">
         <td>
           <router-link
             :to="{ name: 'CountryDetail', params: { country: country.name } }"
@@ -26,22 +25,21 @@
 </template>
 
 <script>
-//import _debounce from "lodash/debounce";
+import { mapActions, mapState } from "vuex";
+import SearchTable from "./SearchTable.vue";
 export default {
+  components: {
+    SearchTable,
+  },
   data() {
     return {
       countries: [],
       isSortAscending: false,
-      searchFilter: "",
+      // searchFilter: "",
     };
   },
-  created() {
-    fetch("https://restcountries.eu/rest/v2/all")
-      .then((res) => res.json())
-      .then((countries) => (this.countries = countries))
-      .catch((err) => console.log(err.message));
-  },
   computed: {
+    ...mapState(["allCountries"]),
     sortButtonText() {
       if (this.isSortAscending) {
         return "A - Z";
@@ -51,26 +49,34 @@ export default {
     },
   },
   methods: {
+    ...mapActions(["fetchAllCountries", "searchCountries"]),
     toggleSort() {
       this.countries = this.countries.reverse();
       this.isSortAscending = !this.isSortAscending;
     },
-    async filterTable() {
-      try {
-        const response = await fetch(
-          `https://restcountries.eu/rest/v2/name/${this.searchFilter}`
-        );
-        if (response.status == 404) {
-          alert("Country not found");
-          return;
-        } else if (response.status == 200) {
-          const countries = await response.json();
-          this.countries = countries;
-        }
-      } catch (err) {
-        console.error(err.message);
-      }
-    },
+    // async filterTable() {
+    //   try {
+    //     const response = await fetch(
+    //       `https://restcountries.eu/rest/v2/name/${this.searchFilter}`
+    //     );
+    //     if (response.status == 404) {
+    //       alert("Country not found");
+    //       return;
+    //     } else if (response.status == 200) {
+    //       const countries = await response.json();
+    //       this.countries = countries;
+    //     }
+    //   } catch (err) {
+    //     console.error(err.message);
+    //   }
+    // },
+  },
+  created() {
+    // fetch("https://restcountries.eu/rest/v2/all")
+    //   .then((res) => res.json())
+    //   .then((countries) => (this.countries = countries))
+    //   .catch((err) => console.log(err.message));
+    this.fetchAllCountries();
   },
 };
 </script>

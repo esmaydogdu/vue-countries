@@ -1,11 +1,12 @@
 <template>
   <div>
-    <input type="text" v-model="searchFilter" />
-    <button @click="filterTable">Search</button>
+    <input v-debounce:500="searchCountries" type="text" />
   </div>
 </template>
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
   data() {
     return {
@@ -13,9 +14,7 @@ export default {
     };
   },
   methods: {
-    filterTable() {
-      console.log(this.searchFilter);
-    },
+    ...mapActions(["searchCountries"]),
   },
 };
 </script>
