@@ -9,10 +9,14 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     allCountries: [],
+    isNotFound: false,
   },
   mutations: {
     setCountries(state, countries) {
       state.allCountries = countries;
+    },
+    setNotFound(state, isNotFound) {
+      state.isNotFound = isNotFound;
     },
   },
   actions: {
@@ -26,15 +30,27 @@ export default new Vuex.Store({
         .catch((err) => console.log(err, "in the store action"));
     },
     searchCountries(context, searchParam) {
-      // cover 404 error page
-      return fetch("https://restcountries.eu/rest/v2/name/" + searchParam)
-        .then((response) => response.json())
-        .then((data) => {
-          context.commit("setCountries", data);
-          return context.state.countries;
-        })
-        .catch((err) => console.log(err, "in the store action search"));
+      if (searchParam.length > 0) {
+        return fetch(
+          "https://restcountries.eu/rest/v2/name/" + searchParam
+        ).then(async (response) => {
+          if (response.status !== 200) {
+            context.commit("setNotFound", true);
+            //throw new Error("404");
+          } else {
+            const data = await response.json();
+            context.commit("setNotFound", false);
+            context.commit("setCountries", data);
+          }
+        });
+      } else {
+        context.commit("setNotFound", false);
+        context.dispatch("fetchAllCountries");
+      }
     },
   },
-  getters: {},
+  getters: {
+    getCountries: (state) => state.allCountries,
+    getNotFound: (state) => state.isNotFound,
+  },
 });

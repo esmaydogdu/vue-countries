@@ -9,9 +9,7 @@ import { mapActions } from "vuex";
 
 export default {
   data() {
-    return {
-      searchFilter: "",
-    };
+    return {};
   },
   methods: {
     ...mapActions(["searchCountries"]),
